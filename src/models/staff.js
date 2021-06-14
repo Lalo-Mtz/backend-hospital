@@ -1,47 +1,38 @@
 // Modules
 const bcryptjs = require('bcryptjs');
 
-class Doctor {
+class Staff {
     constructor(req) {
         this.username = req.username;
-        this.email = req.email;
         this.password = req.password;
-        this.verify = req.verify || false;
-        if (req.id) {
+        if(req.id){
             this.id = req.id;
         }
     }
 
-    getDoctor() {
+    getStaff() {
         return {
             username: this.username,
-            email: this.email,
-            password: this.password,
-            verify: this.verify
+            password : this.password
         };
     }
 
-    getId() {
+    getId(){
         return this.id;
     }
 
-    getVerify(){
-        return this.verify;
-    }
-
-    getEmail() {
-        return this.email;
+    getUsername(){
+        return this.username;
     }
 
     encrypttPassword = async (password) => {
-        const salt = await bcryptjs.genSalt(10);
+        const salt = await bcryptjs.genSalt(8);
         return bcryptjs.hash(password, salt);
     }
 
     validatePassword = async (password) => {
         return bcryptjs.compare(password, this.password);
     }
-
 }
 
-module.exports = Doctor;
+module.exports = Staff;

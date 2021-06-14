@@ -1,3 +1,5 @@
 node_modules
 .env
 hospital.rest
+patients.rest
+/test

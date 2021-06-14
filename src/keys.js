@@ -8,6 +8,9 @@ module.exports = {
     },
 
     jsonToken: {
-        secret: process.env.SECRET_JWT
+        secret: process.env.SECRET_JWT,
+        secretNurse: process.env.SECRET_NURSE_JWT,
+        secretStaff: process.env.SECRET_STAFF_JWT,
+        secretEmailAuth: process.env.SECRET_EMAIL_JWT
     }
 }
