@@ -24,6 +24,7 @@ app.use('/nurse', require('./routes/nurse'));
 app.use('/staff', require('./routes/staff'));
 app.use('/patient', require('./routes/patient'));
 app.use('/authorization', require('./routes/authorization'));
+app.use('/prescription', require('./routes/prescription'));
 
 // Public
 

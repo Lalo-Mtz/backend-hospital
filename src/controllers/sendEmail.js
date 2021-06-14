@@ -33,7 +33,7 @@ const sendEmail = async (id, email) => {
 
     const info = await transporter.sendMail({
         from: "Star App <consultationstarapp@gmail.com>",
-        to: 'gerardocct@gmail.com',
+        to: `${email}`,
         subject: 'Authentication Email',
         html: contentHTLM
     });

@@ -66,7 +66,7 @@ CREATE TABLE vitalsigns(
 CREATE TABLE prescription(
 	id_con INT NOT NULL,
     id_doc INT NOT NULL,
-    list VARCHAR(300),
+    list TEXT,
     create_at TIMESTAMP NOT NULL DEFAULT current_timestamp,
     CONSTRAINT fk_consultation_pres FOREIGN KEY (id_con) REFERENCES consultation(id),
     CONSTRAINT fk_doctor_pres FOREIGN KEY (id_doc) REFERENCES doctor(id)
