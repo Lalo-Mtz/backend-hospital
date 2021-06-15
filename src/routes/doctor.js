@@ -44,7 +44,7 @@ router.post('/signin', async (req, res) => {
     const result = await pool.query('SELECT * FROM doctor WHERE email = ?', [email]);
 
     if (!result[0]) {
-        return res.status(404).send("The email doesn't exists" );
+        return res.status(404).json({ auth: false, message: "The email doesn't exists"});
     }
 
     const doctor = new Doctor(result[0]);
@@ -52,14 +52,14 @@ router.post('/signin', async (req, res) => {
     const validPassword = await doctor.validatePassword(password);
 
     if (!validPassword) {
-        return res.status(401).json({ auth: false, token: null });
+        return res.status(401).json({ auth: false, message: "Incorrect password" });
     }
 
     const token = jwt.sign({ id: doctor.getId(), verify: doctor.getVerify() }, jsonToken.secret, {
         expiresIn: 60 * 60 * 24
     });
 
-    res.json({ auth: true, token });
+    res.json({ auth: true, token, username: doctor.getUsername() });
 });
 
 router.get('/', verifyToken, async (req, res) => {

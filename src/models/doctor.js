@@ -33,6 +33,10 @@ class Doctor {
         return this.email;
     }
 
+    getUsername(){
+        return this.username;
+    }
+
     encrypttPassword = async (password) => {
         const salt = await bcryptjs.genSalt(10);
         return bcryptjs.hash(password, salt);
