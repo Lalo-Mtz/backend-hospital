@@ -38,7 +38,7 @@ router.post('/signin', async (req, res) => {
     const result = await pool.query('SELECT * FROM nurse WHERE username = ?', [username]);
 
     if (!result[0]) {
-        return res.status(404).send("The nurse doesn't exists");
+        return res.status(404).json({auth: false, message: "The nurse doesn't exists"});
     }
 
     const nurse = new Nurse(result[0]);
@@ -46,14 +46,14 @@ router.post('/signin', async (req, res) => {
     const validPassword = await nurse.validatePassword(password);
 
     if (!validPassword) {
-        return res.status(401).json({ auth: false, token: null });
+        return res.status(401).json({ auth: false, message: "Incorrect password" });
     }
 
     const token = jwt.sign({ id: nurse.getId() }, jsonToken.secretNurse, {
         expiresIn: 60 * 60 * 24
     });
 
-    res.json({ auth: true, token });
+    res.json({ auth: true, token, username: nurse.getUsername() });
 });
 
 
