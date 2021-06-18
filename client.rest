@@ -1,0 +1,9 @@
+###
+POST http://localhost:3000/doctor/signup
+Content-Type: application/json
+
+{
+    "username": "brayan2",
+    "email": "geekzzunex@gmail.com",
+    "password": "250214"
+}

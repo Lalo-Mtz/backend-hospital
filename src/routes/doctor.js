@@ -14,7 +14,7 @@ const router = Router();
 
 router.post('/signup', async (req, res) => {
     const doctor = new Doctor(req.body);
-    
+
     doctor.password = await doctor.encrypttPassword(doctor.password);
 
     const valid = await pool.query('SELECT * FROM doctor WHERE email = ?', [doctor.getEmail()]);
@@ -60,6 +60,7 @@ router.post('/signin', async (req, res) => {
     });
 
     res.json({ auth: true, token });
+res.send('Helo');
 });
 
 router.get('/', verifyToken, async (req, res) => {
