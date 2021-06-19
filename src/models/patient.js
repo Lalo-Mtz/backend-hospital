@@ -4,6 +4,8 @@ class Patient {
         this.surnames = req.surnames;
         this.birthdate = req.birthdate;
         this.phone = req.phone;
+        this.sex = req.sex;
+        this.state = req.state;
         if(req.id){
             this.id = req.id;
         }
@@ -14,7 +16,9 @@ class Patient {
             name: this.name,
             surnames : this.surnames, 
             birthdate : this.birthdate,
-            phone : this.phone
+            phone : this.phone,
+            sex : this.sex,
+            state : this.state
         };
     }
 

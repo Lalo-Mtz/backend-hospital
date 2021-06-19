@@ -8,13 +8,15 @@ class Consultation {
         this.id_nur = id_nur;
         this.reason = req.reason;
         this.results = '';
+        this.urgency = req.urgency;
     }
 
     getConsultation() {
         return {
             id_pat: this.id_pat,
             id_nur : this.id_nur, 
-            reason : this.reason
+            reason : this.reason,
+            urgency: this.urgency
         };
     }
 
