@@ -90,7 +90,7 @@ router.get('/dashboard', verifyToken, async (req, res) => {
                                         ORDER BY create_at DESC;`,
     [req.userId]);
     const n_week = await pool.query(`SELECT count(id) AS n_week FROM consultation
-                                    WHERE id_doc = ? AND weekofyear(create_at) = weekofyear('2021-06-17');`,
+                                    WHERE id_doc = ? AND weekofyear(create_at) = weekofyear(?);`,
     [req.userId, new Date()]);
     res.json({
         success: true,
