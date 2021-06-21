@@ -63,25 +63,35 @@ router.post('/signin', async (req, res) => {
 });
 
 router.get('/', verifyToken, async (req, res) => {
-    const doc = await pool.query('SELECT * FROM doctor WHERE id = ?', [req.userId]);
+    const doc = await pool.query(`SELECT id, username, email, type, country, college, phone, verify
+                                  FROM doctor WHERE id = ?`, 
+    [req.userId]);
     if (!doc[0].id) {
         return res.status(404).send('No doc found');
     }
-    doc[0].password = '';
     res.json(doc[0]);
 });
+
+router.post('/', verifyToken, async (req, res) => {
+    const doctor = new Doctor(req.body);
+    const result = await pool.query('UPDATE doctor SET ? WHERE id = ?', [doctor.getDoctorSecurity(), doctor.getId()]);
+    if(!result.affectedRows){
+        return res.status(400).json({success: false, message: 'Some error has ocurred'});
+    }
+    res.json({success: true, message: 'Changes mede succesfuly'});
+})
 
 
 router.get('/dashboard', verifyToken, async (req, res) => {
     const n_patients = await pool.query('SELECT * FROM consultation WHERE id_doc = ? GROUP BY (id_pat);', [req.userId]);
-    const historial = await pool.query(`SELECT consultation.id, consultation.create_at,  patient.name, patient.surnames, consultation.reason FROM consultation INNER JOIN patient 
+    const historial = await pool.query(`SELECT consultation.id, date_format(consultation.create_at, "%d-%m-%Y") as create_at,  patient.name, patient.surnames, consultation.reason, consultation.urgency FROM consultation INNER JOIN patient 
                                         ON patient.id = consultation.id_pat 
                                         WHERE consultation.id_doc = ? 
                                         ORDER BY create_at DESC;`,
     [req.userId]);
     const n_week = await pool.query(`SELECT count(id) AS n_week FROM consultation
-                                    WHERE id_doc = 1 AND weekofyear(create_at) = weekofyear('2021-06-17');`,
-    [new Date()]);
+                                    WHERE id_doc = ? AND weekofyear(create_at) = weekofyear('2021-06-17');`,
+    [req.userId, new Date()]);
     res.json({
         success: true,
         num_p: n_patients.length,

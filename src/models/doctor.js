@@ -5,8 +5,12 @@ class Doctor {
     constructor(req) {
         this.username = req.username;
         this.email = req.email;
-        this.password = req.password;
+        this.password = req.password || "";
         this.verify = req.verify || false;
+        this.type = req.type || "";
+        this.country = req.country || "";
+        this.college = req.college || "";
+        this.phone = req.phone || "";
         if (req.id) {
             this.id = req.id;
         }
@@ -21,11 +25,22 @@ class Doctor {
         };
     }
 
+    getDoctorSecurity() {
+        return {
+            username: this.username,
+            email: this.email,
+            type: this.type,
+            country: this.country,
+            college: this.college,
+            phone: this.phone
+        };
+    }
+
     getId() {
         return this.id;
     }
 
-    getVerify(){
+    getVerify() {
         return this.verify;
     }
 
@@ -33,7 +48,7 @@ class Doctor {
         return this.email;
     }
 
-    getUsername(){
+    getUsername() {
         return this.username;
     }
 
