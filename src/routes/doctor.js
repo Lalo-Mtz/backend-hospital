@@ -138,7 +138,7 @@ router.get('/patient/:id_con', verifyToken, async (req, res) => {
     if (!pat[0].name) {
         return res.status(404).json({ success: false, message: 'Patient not found' });
     }
-    res.json({ success: true, patient: pat[0]});
+    res.json({ success: true, patient: pat[0] });
 });
 
 router.get('/estadisticos', verifyToken, async (req, res) => {
@@ -151,19 +151,44 @@ router.get('/estadisticos', verifyToken, async (req, res) => {
     var h = Number.parseInt(r1[0].cuantity);
     var m = Number.parseInt(r1[1].cuantity);
     var t = h + m;
-    h = ((h*100)/t).toFixed(2);
-    m = ((m*100)/t).toFixed(2);
+    h = ((h * 100) / t).toFixed(2);
+    m = ((m * 100) / t).toFixed(2);
     mas = r2[0].reason;
     edad = r3[0].age;
     var me = Number.parseInt(r4[0].cuantity);
     var ba = Number.parseInt(r4[1].cuantity);
     var al = Number.parseInt(r4[2].cuantity);
     var to = me + ba + al;
-    me = ((me*100)/to).toFixed(2);
-    ba = ((ba*100)/to).toFixed(2);
-    al = ((al*100)/to).toFixed(2);
-    
-    res.json({success: true, esta: {h, m, mas, edad, me, ba, al}});
+    me = ((me * 100) / to).toFixed(2);
+    ba = ((ba * 100) / to).toFixed(2);
+    al = ((al * 100) / to).toFixed(2);
+
+    res.json({ success: true, esta: { h, m, mas, edad, me, ba, al } });
+});
+
+router.get('/consultation/:id_con', async (req, res) => {
+    const id_con = req.params.id_con;
+    const result = await pool.query(`SELECT patient.*, FORMAT(datediff('2021/06/20',patient.birthdate)/365, 0) as age, vitalsigns.*, consultation.reason 
+                                     FROM consultation INNER JOIN vitalsigns ON vitalsigns.id_con = consultation.id 
+                                     INNER JOIN patient ON consultation.id_pat = patient.id  WHERE consultation.id = ?`,
+        [id_con]);
+
+    res.json({ success: true, info: result[0] });
+});
+
+router.post('/resultados/:id_con', verifyToken, async (req, res) => {
+    const id_con = req.params.id_con;
+    const resulta = req.body.resul;
+    console.log(resulta);
+    const result = await pool.query(`UPDATE consultation SET results=? WHERE id = ?`, [resulta, id_con]);
+    res.json({ success: true });
+});
+
+router.post('/receta/:id_con', verifyToken, async (req, res) => {
+    const id_con = req.params.id_con;
+    const reset = req.body.rece;
+    const result = await pool.query(`INSERT INTO prescription set ?`, [{id_con, id_doc: req.userId, list: reset.rece}]);
+    res.json({ success: true });
 });
 
 module.exports = router;
