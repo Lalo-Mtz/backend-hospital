@@ -85,4 +85,15 @@ router.get('/prescription/:id', verifyToken, async (req, res) => {
     res.status(404).json({success: false, message: "Info not found"});
 });
 
+router.get('/results/:id', verifyToken, async (req, res) => {
+    const id = req.params.id;
+    const result = await pool.query(`SELECT * 
+                                     FROM resultlab WHERE id_con = ?`, 
+    [id]);
+    if(result[0]){
+        return res.json({success: true, prescription: result[0]});
+    }
+    res.status(404).json({success: false, message: "Info not found"});
+});
+
 module.exports = router;

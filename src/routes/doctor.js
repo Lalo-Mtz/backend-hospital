@@ -141,4 +141,29 @@ router.get('/patient/:id_con', verifyToken, async (req, res) => {
     res.json({ success: true, patient: pat[0]});
 });
 
+router.get('/estadisticos', verifyToken, async (req, res) => {
+    const r1 = await pool.query(`select count(id) as cuantity, sex from patient group by sex order by sex`);
+    const r2 = await pool.query(`select count(id) as cuantity, reason from consultation group by reason order by cuantity desc;`);
+    const r3 = await pool.query(`SELECT patient.id, FORMAT(datediff('2021/06/20',birthdate)/365, 0) as age, consultation.*, count(patient.id) as num FROM patient inner join consultation on 
+                                 patient.id = consultation.id_pat group by age order by num desc;`);
+    const r4 = await pool.query(`select count(id) as cuantity, urgency from consultation group by urgency;`);
+
+    var h = Number.parseInt(r1[0].cuantity);
+    var m = Number.parseInt(r1[1].cuantity);
+    var t = h + m;
+    h = ((h*100)/t).toFixed(2);
+    m = ((m*100)/t).toFixed(2);
+    mas = r2[0].reason;
+    edad = r3[0].age;
+    var me = Number.parseInt(r4[0].cuantity);
+    var ba = Number.parseInt(r4[1].cuantity);
+    var al = Number.parseInt(r4[2].cuantity);
+    var to = me + ba + al;
+    me = ((me*100)/to).toFixed(2);
+    ba = ((ba*100)/to).toFixed(2);
+    al = ((al*100)/to).toFixed(2);
+    
+    res.json({success: true, esta: {h, m, mas, edad, me, ba, al}});
+});
+
 module.exports = router;
