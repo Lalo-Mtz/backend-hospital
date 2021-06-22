@@ -39,7 +39,7 @@ router.post('/signin', async (req, res) => {
     const result = await pool.query('SELECT * FROM nurse WHERE username = ?', [username]);
 
     if (!result[0]) {
-        return res.status(404).json({auth: false, message: "The nurse doesn't exists"});
+        return res.status(404).json({ auth: false, message: "The nurse doesn't exists" });
     }
 
     const nurse = new Nurse(result[0]);
@@ -83,10 +83,14 @@ router.post('/addvitalsigns/:id_con', verifyToken, async (req, res) => {
     try {
         const result = await pool.query('SELECT id_con FROM vitalsigns WHERE id_con = ?', [req.params.id_con]);
         if (!result[0]) {
-            const { weight, size, temperatura, blood_pre, hearbeat } = req.body;
+            const { weight, size, temperatura, blood_pre, hearbeat } = req.body.vitalsings;
+            const { color, aspecto, sedimento, gravedad, ph, electrolitos, leucocitos, bacterias, celulas } = req.body.resultlab;
             const vitalsigns = { id_con: req.params.id_con, weight, size, temperatura, blood_pre, hearbeat }
+            const resultlab = { id_con: req.params.id_con, color, aspecto, sedimento, gravedad, ph, electrolitos, leucocitos, bacterias, celulas };
             const result = await pool.query('INSERT INTO vitalsigns SET ?', [vitalsigns]);
-            if (result.affectedRows) {
+            const result2 = await pool.query('INSERT INTO resultlab SET ?', [resultlab]);
+            console.log(result, result2)
+            if (result.affectedRows && result2.affectedRows) {
                 return res.json({ success: true, id_con: req.params.id_con });
             } else {
                 return res.status(401).json({ success: false, message: "An error has occurred" });
@@ -102,14 +106,29 @@ router.post('/addvitalsigns/:id_con', verifyToken, async (req, res) => {
     }
 });
 
-router.get('/joindoctor', verifyToken, async (req, res) => {
-    const result = await pool.query('SELECT * FROM inline WHERE state = 0');
-    if(result.length != 0 ){
-        
-    }else{
-        return res.status(404).json({success: false, message: "Evrey doctors are busy"});
+router.get('/joindoctor/:id_con', verifyToken, async (req, res) => {
+    const id_con = req.params.id_con;
+    const result = await pool.query('SELECT * FROM inline WHERE state = 1');
+    if (result.length != 0) {
+        const r = await pool.query('UPDATE consultation SET id_doc = ? WHERE id = ?', [result[0].id_doc, id_con]);
+        if (r.affectedRows == 1) {
+            return res.json({ success: true, id_doc: result[0].id_doc, url: uuidv4() });
+        } else {
+            return res.status(404).json({ success: false, message: "Has occurred some error" });
+        }
+
+    } else {
+        return res.status(404).json({ success: false, message: "Evrey doctors are busy" });
     }
-    res.json({success: true})
+})
+
+router.get('/verifyDoctors', verifyToken, async (req, res) => {
+    const result = await pool.query('SELECT * FROM inline WHERE state = 1');
+    if (result.length != 0) {
+        return res.json({ success: true, message: "Some doctor are available" });
+    } else {
+        return res.json({ success: false, message: "Evrey doctors are busy" });
+    }
 })
 
 module.exports = router;

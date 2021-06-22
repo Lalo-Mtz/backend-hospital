@@ -75,7 +75,7 @@ router.post('/signin', async (req, res) => {
 router.get('/offline', verifyToken, async (req, res) => {
     const r = await pool.query('UPDATE inline SET state = false WHERE id_doc = ?', [req.userId]);
     if (r.affectedRows) {
-        return res.json({ success: true, message: 'Offline successfully'});
+        return res.json({ success: true, message: 'Offline successfully' });
     } else {
         return res.status(401).json({ succes: false, message: "Has ocurred some error" });
     }
@@ -84,7 +84,7 @@ router.get('/offline', verifyToken, async (req, res) => {
 router.get('/inline', verifyToken, async (req, res) => {
     const r = await pool.query('UPDATE inline SET state = true WHERE id_doc = ?', [req.userId]);
     if (r.affectedRows) {
-        return res.json({ success: true, message: 'Inline successfully'});
+        return res.json({ success: true, message: 'Inline successfully' });
     } else {
         return res.status(401).json({ succes: false, message: "Has ocurred some error" });
     }
@@ -126,6 +126,19 @@ router.get('/dashboard', verifyToken, async (req, res) => {
         num_w: n_week[0].n_week,
         patients: historial,
     });
+});
+
+router.get('/patient/:id_con', verifyToken, async (req, res) => {
+
+    const pat = await pool.query(`SELECT patient.name, patient.surnames, consultation.reason 
+                                  FROM consultation INNER JOIN patient ON consultation.id_pat = patient.id
+                                  WHERE consultation.id = ?`,
+        [req.params.id_con]);
+
+    if (!pat[0].name) {
+        return res.status(404).json({ success: false, message: 'Patient not found' });
+    }
+    res.json({ success: true, patient: pat[0]});
 });
 
 module.exports = router;

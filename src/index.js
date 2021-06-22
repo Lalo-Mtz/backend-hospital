@@ -4,6 +4,7 @@ require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
+const path = require('path');
 
 // Initializations
 const app = express();
@@ -29,6 +30,8 @@ app.use('/authorization', require('./routes/authorization'));
 app.use('/prescription', require('./routes/prescription'));
 
 // Public
+app.use(express.static(path.join(__dirname, 'public')));
+
 
 // Starting the Server
 app.listen(app.get('port'), () => {
