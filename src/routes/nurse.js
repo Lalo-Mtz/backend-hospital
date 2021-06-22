@@ -86,9 +86,9 @@ router.post('/addvitalsigns/:id_con', verifyToken, async (req, res) => {
             const vitalsigns = { id_con: req.params.id_con, weight, size, temperatura, blood_pre, hearbeat }
             const result = await pool.query('INSERT INTO vitalsigns SET ?', [vitalsigns]);
             if (result.affectedRows) {
-                return res.json({ seccess: true, id_con: req.params.id_con });
+                return res.json({ success: true, id_con: req.params.id_con });
             } else {
-                return res.status(401).json({ seccess: false, message: "An error has occurred" });
+                return res.status(401).json({ success: false, message: "An error has occurred" });
             }
         } else {
             return res.status(401).json({
@@ -97,7 +97,7 @@ router.post('/addvitalsigns/:id_con', verifyToken, async (req, res) => {
             });
         }
     } catch (error) {
-        return res.status(401).json({ seccess: false, message: "An error has occurred" });
+        return res.status(401).json({ success: false, message: "An error has occurred" });
     }
 });
 

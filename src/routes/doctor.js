@@ -32,7 +32,13 @@ router.post('/signup', async (req, res) => {
     const send = sendEmail(result.insertId, doctor.getEmail());
 
     if (send) {
-        return res.json({ auth: true, token, message: 'Doctor successfully saved' });
+        const inline = { id_doc: result.insertId, state: false };
+        const r = await pool.query('INSERT INTO inline SET ?', [inline]);
+        if (r.affectedRows) {
+            return res.json({ auth: true, token, message: 'Doctor saved successfully' });
+        } else {
+            return res.status(401).json({ auth: false, message: 'Has occurred some error' });
+        }
     } else {
         return res.json({ auth: true, token, message: 'Error with email' });
     }
@@ -58,14 +64,36 @@ router.post('/signin', async (req, res) => {
     const token = jwt.sign({ id: doctor.getId(), verify: doctor.getVerify() }, jsonToken.secret, {
         expiresIn: 60 * 60 * 24
     });
+    const r = await pool.query('UPDATE inline SET state = true WHERE id_doc = ?', [doctor.getId()]);
+    if (r.affectedRows) {
+        return res.json({ auth: true, token, username: doctor.getUsername(), verify: doctor.getVerify() });
+    } else {
+        return res.status(401).json({ auth: false, message: "Has ocurred some error" });
+    }
+});
 
-    res.json({ auth: true, token, username: doctor.getUsername(), verify: doctor.getVerify() });
+router.get('/offline', verifyToken, async (req, res) => {
+    const r = await pool.query('UPDATE inline SET state = false WHERE id_doc = ?', [req.userId]);
+    if (r.affectedRows) {
+        return res.json({ success: true, message: 'Offline successfully'});
+    } else {
+        return res.status(401).json({ succes: false, message: "Has ocurred some error" });
+    }
+});
+
+router.get('/inline', verifyToken, async (req, res) => {
+    const r = await pool.query('UPDATE inline SET state = true WHERE id_doc = ?', [req.userId]);
+    if (r.affectedRows) {
+        return res.json({ success: true, message: 'Inline successfully'});
+    } else {
+        return res.status(401).json({ succes: false, message: "Has ocurred some error" });
+    }
 });
 
 router.get('/', verifyToken, async (req, res) => {
     const doc = await pool.query(`SELECT id, username, email, type, country, college, phone, verify
-                                  FROM doctor WHERE id = ?`, 
-    [req.userId]);
+                                  FROM doctor WHERE id = ?`,
+        [req.userId]);
     if (!doc[0].id) {
         return res.status(404).send('No doc found');
     }
@@ -75,12 +103,11 @@ router.get('/', verifyToken, async (req, res) => {
 router.post('/', verifyToken, async (req, res) => {
     const doctor = new Doctor(req.body);
     const result = await pool.query('UPDATE doctor SET ? WHERE id = ?', [doctor.getDoctorSecurity(), doctor.getId()]);
-    if(!result.affectedRows){
-        return res.status(400).json({success: false, message: 'Some error has ocurred'});
+    if (!result.affectedRows) {
+        return res.status(400).json({ success: false, message: 'Some error has ocurred' });
     }
-    res.json({success: true, message: 'Changes mede succesfuly'});
+    res.json({ success: true, message: 'Changes mede succesfuly' });
 })
-
 
 router.get('/dashboard', verifyToken, async (req, res) => {
     const n_patients = await pool.query('SELECT * FROM consultation WHERE id_doc = ? GROUP BY (id_pat);', [req.userId]);
@@ -88,10 +115,10 @@ router.get('/dashboard', verifyToken, async (req, res) => {
                                         ON patient.id = consultation.id_pat 
                                         WHERE consultation.id_doc = ? 
                                         ORDER BY create_at DESC;`,
-    [req.userId]);
+        [req.userId]);
     const n_week = await pool.query(`SELECT count(id) AS n_week FROM consultation
                                     WHERE id_doc = ? AND weekofyear(create_at) = weekofyear(?);`,
-    [req.userId, new Date()]);
+        [req.userId, new Date()]);
     res.json({
         success: true,
         num_p: n_patients.length,

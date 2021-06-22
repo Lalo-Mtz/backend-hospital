@@ -5,7 +5,6 @@ class Patient {
         this.birthdate = req.birthdate;
         this.phone = req.phone;
         this.sex = req.sex || "";
-        this.state = req.state || "";
         if(req.id){
             this.id = req.id;
         }
@@ -18,7 +17,6 @@ class Patient {
             birthdate : this.birthdate,
             phone : this.phone,
             sex : this.sex,
-            state : this.state
         };
     }
 
