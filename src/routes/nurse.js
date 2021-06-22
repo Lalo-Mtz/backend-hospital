@@ -1,6 +1,7 @@
 // Modules
 const { Router } = require('express');
 const jwt = require('jsonwebtoken');
+const { v4: uuidv4 } = require('uuid');
 
 // Our procces
 const pool = require('../database');
@@ -100,5 +101,15 @@ router.post('/addvitalsigns/:id_con', verifyToken, async (req, res) => {
         return res.status(401).json({ success: false, message: "An error has occurred" });
     }
 });
+
+router.get('/joindoctor', verifyToken, async (req, res) => {
+    const result = await pool.query('SELECT * FROM inline WHERE state = 0');
+    if(result.length != 0 ){
+        
+    }else{
+        return res.status(404).json({success: false, message: "Evrey doctors are busy"});
+    }
+    res.json({success: true})
+})
 
 module.exports = router;
